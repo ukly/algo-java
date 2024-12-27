@@ -3,93 +3,101 @@ package week4;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class quiz1774 {
-    private static int n, m, e, parent[], rank[], count =0;
-    private static double edges[][], nodes[][], answer =0;
+    private static int n, m, parent[];
+    private static double  answer = 0;
+
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
-
         n = Integer.parseInt(st.nextToken());
         m = Integer.parseInt(st.nextToken());
+        parent = new int[n];
+        makeSet(n);
 
-        e = n*(n-1)/2;
+        List<Node> nodes = new ArrayList<>();
+        List<Edge> edges = new ArrayList<>();
 
-        edges = new double[e+1][3];
-        parent = new int[n+1];
-        rank = new int[n+1];
-        nodes = new double[n+1][2];
-
-        for (int i = 1; i <= n; i++) {
+        for (int i = 0; i < n; i++) {
             st = new StringTokenizer(br.readLine());
-            nodes[i][0] = Double.parseDouble(st.nextToken());
-            nodes[i][1] = Double.parseDouble(st.nextToken());
-
-            parent[i] = i;
-            rank[i] = 0;
+            nodes.add(new Node(Double.parseDouble(st.nextToken()), Double.parseDouble(st.nextToken())));
         }
 
-        for (int i = 0; i < m; i++) { // 무조건 연결해놓기
+        for (int i = 0; i < nodes.size(); i++) {
+            for (int j = i + 1; j < nodes.size(); j++) {
+                double dist = calcDistance(nodes.get(i), nodes.get(j));
+                edges.add(new Edge(i, j, dist));
+            }
+        }
+
+        for (int i = 0; i < m; i++) {
             st = new StringTokenizer(br.readLine());
             int a = Integer.parseInt(st.nextToken());
             int b = Integer.parseInt(st.nextToken());
-            if(findSet(a) != findSet(b)) {
-                count++;
-                unionSet(a, b);
-            }
+            unionSet(a-1, b-1);
         }
 
-        int idx = 1;
-        for (int i = 1; i <= n; i++) {
-            for (int j = i+1; j <= n; j++){
-                edges[idx][0] = i;
-                edges[idx][1] = j;
-                edges[idx][2] = calcDistance(nodes[i], nodes[j]);
-                idx++;
-            }
-        }
-        Arrays.sort(edges, (a, b) -> Double.compare(a[2], b[2]));
+        edges.sort((a, b) -> Double.compare(a.weight, b.weight));
 
-        for (int i = 1; i <= e; i++) {
-            if(count == n-1) break;
-            int a = (int) edges[i][0];
-            int b = (int) edges[i][1];
-            if(findSet(a) != findSet(b)) {
-                answer += edges[i][2];
-                count++;
-                unionSet(a, b);
+
+        for(Edge edge : edges){
+            if(findSet(edge.u) != findSet(edge.v)){
+                unionSet(edge.u, edge.v);
+                answer += edge.weight;
             }
         }
-        System.out.printf("%.2f\n", answer);
+        System.out.println(String.format("%.2f", answer));
     }
 
-    private static double calcDistance(double[] a, double[] b){
-        double dx = a[0] - b[0];
-        double dy = a[1] - b[1];
-        return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    static class Edge{
+        int u;
+        int v;
+        double weight;
+
+        public Edge(int u, int v, double weight){
+            this.u = u;
+            this.v = v;
+            this.weight = weight;
+        }
+    }
+
+    static class Node{
+        double x;
+        double y;
+
+        public Node(double x, double y){
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    private static double calcDistance(Node u, Node v){
+        double dx = u.x - v.x;
+        double dy = u.y - v.y;
+        return Math.sqrt(dx*dx + dy*dy);
     }
 
     private static void unionSet(int u, int v){
         int rootU = findSet(u);
         int rootV = findSet(v);
 
-        if (rootU != rootV){
-            if(rank[rootU] < rank[rootV]) {
-                parent[rootU] = rootV;
-            } else if (rank[rootU] > rank[rootV]){
-                parent[rootV] = rootU;
-            } else {
-                parent[rootV] = rootU;
-                rank[rootU]++;
-            }
-        }
+        if(rootU > rootV) parent[rootV] = parent[rootU];
+        else parent[rootU] = parent[rootV];
     }
 
     private static int findSet(int u){
         if (parent[u] == u) return u;
         return parent[u] = findSet(parent[u]);
+    }
+
+    private static void makeSet(int n){
+        for (int i = 0; i < n; i++) {
+            parent[i]=i;
+        }
     }
 }

@@ -3,61 +3,76 @@ package week4;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class quiz4386 {
-    private static int n, e, parent[], rank[], count =0;
-    private static double edges[][], nodes[][], answer =0;
+    private static int n, e, parent[], count = 0;
+    private static double  answer = 0;
+
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st;
 
         n = Integer.parseInt(br.readLine());
-
-        e = n*(n-1)/2;
-
-        edges = new double[e][3];
         parent = new int[n];
-        rank = new int[n];
-        nodes = new double[n][2];
+        makeSet(n);
+
+        e = n * (n - 1) / 2;
+
+        List<Node> nodes = new ArrayList<>();
+        List<Edge> edges = new ArrayList<>();
 
         for (int i = 0; i < n; i++) {
             st = new StringTokenizer(br.readLine());
-            nodes[i][0] = Double.parseDouble(st.nextToken());
-            nodes[i][1] = Double.parseDouble(st.nextToken());
-
-            parent[i] = i;
-            rank[i] = 0;
+            nodes.add(new Node(Double.parseDouble(st.nextToken()), Double.parseDouble(st.nextToken())));
         }
 
-        int idx = 0;
-        for (int i = 0; i < n; i++) {
-            for (int j = i+1; j < n; j++){
-                edges[idx][0] = i;
-                edges[idx][1] = j;
-                edges[idx][2] = calcDistance(nodes[i], nodes[j]);
-                idx++;
+        for (int i = 0; i < nodes.size(); i++) {
+            for (int j = i + 1; j < nodes.size(); j++) {
+                double dist = calcDistance(nodes.get(i), nodes.get(j));
+                edges.add(new Edge(i, j, dist));
             }
         }
-        Arrays.sort(edges, (a, b) -> (int)(a[2] - b[2]));
 
-        for (int i = 0; i < e; i++) {
-            if(count == n-1) break;
-            int a = (int) edges[i][0];
-            int b = (int) edges[i][1];
-            if(findSet(a) != findSet(b)) {
-                answer += edges[i][2];
+        edges.sort((a, b) -> Double.compare(a.weight, b.weight));
+
+
+        for(Edge edge : edges){
+            if(findSet(edge.u) != findSet(edge.v)){
+                unionSet(edge.u, edge.v);
                 count++;
-                unionSet(a, b);
+                answer += edge.weight;
             }
+            if(count == n-1) break;
         }
-        System.out.println(Math.round(answer*100)/100.0);
+        System.out.println(Math.round(answer * 100) / 100.0);
     }
 
-    private static double calcDistance(double[] a, double[] b){
-        double dx = a[0] - b[0];
-        double dy = a[1] - b[1];
+    static class Edge{
+        int u;
+        int v;
+        double weight;
+
+        public Edge(int u, int v, double weight){
+            this.u = u;
+            this.v = v;
+            this.weight = weight;
+        }
+    }
+
+    static class Node{
+        double x;
+        double y;
+
+        public Node(double x, double y){
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    private static double calcDistance(Node u, Node v){
+        double dx = u.x - v.x;
+        double dy = u.y - v.y;
         return Math.sqrt(dx*dx + dy*dy);
     }
 
@@ -65,20 +80,18 @@ public class quiz4386 {
         int rootU = findSet(u);
         int rootV = findSet(v);
 
-        if (rootU != rootV){
-            if(rank[rootU] < rank[rootV]) {
-                parent[rootU] = rootV;
-            } else if (rank[rootU] > rank[rootV]){
-                parent[rootV] = rootU;
-            } else {
-                parent[rootV] = rootU;
-                rank[rootU]++;
-            }
-        }
-    }
+        if(rootU > rootV) parent[rootV] = parent[rootU];
+        else parent[rootU] = parent[rootV];
+     }
 
     private static int findSet(int u){
         if (parent[u] == u) return u;
         return parent[u] = findSet(parent[u]);
+    }
+
+    private static void makeSet(int n){
+        for (int i = 0; i < n; i++) {
+            parent[i]=i;
+        }
     }
 }

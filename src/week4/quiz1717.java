@@ -4,8 +4,9 @@ import java.io.*;
 import java.util.StringTokenizer;
 
 public class quiz1717 {
-    private static int n, m, a, b, parent[], rank[], op;
-    public static void main(String[] args) throws IOException {
+    private static int n, m, a, b, parent[], op;
+
+    public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
         StringTokenizer st = new StringTokenizer(br.readLine());
@@ -13,17 +14,18 @@ public class quiz1717 {
         n = Integer.parseInt(st.nextToken());
         m = Integer.parseInt(st.nextToken());
 
-        makeSet(n);
-
-        for(int i=0; i<m; i++){
+        makesSet(n);
+        for (int i = 0; i < m; i++) {
             st = new StringTokenizer(br.readLine());
             op = Integer.parseInt(st.nextToken());
             a = Integer.parseInt(st.nextToken());
             b = Integer.parseInt(st.nextToken());
-
-            if(op == 0) unionSet(a, b);
-            else {
-                if(findSet(a) == findSet(b)) bw.write("YES\n");
+            if(op == 0){
+                unionSet(a, b);
+            } else {
+                int rootA = findSet(a);
+                int rootB = findSet(b);
+                if(rootA == rootB) bw.write("YES\n");
                 else bw.write("NO\n");
             }
         }
@@ -35,12 +37,8 @@ public class quiz1717 {
         int rootU = findSet(u);
         int rootV = findSet(v);
 
-        if (rootU > rootV) parent[rootV] = rootU;
-        else if (rootU < rootV) parent[rootU] = rootV;
-        else {
-            parent[rootV] = rootU;
-            rank[rootU]++;
-        }
+        if(rootU > rootV) parent[rootV] = rootU;
+        else parent[rootU] = rootV;
     }
 
     private static int findSet(int u){
@@ -49,12 +47,10 @@ public class quiz1717 {
         return parent[u];
     }
 
-    private static void makeSet(int u){
-        parent = new int[u+1];
-        rank = new int[u+1];
-        for(int i=0; i<=u; i++) {
+    private static void makesSet(int n){
+        parent = new int[n+1];
+        for (int i = 0; i < n + 1; i++) {
             parent[i] = i;
-            rank[i] = 0;
         }
     }
 }
