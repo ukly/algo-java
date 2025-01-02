@@ -1,4 +1,4 @@
-package code_plus.bruteForce.boj1339;
+package boj.bruteForce.boj1339;
 
 import java.io.BufferedReader;
 import java.io.IOException;

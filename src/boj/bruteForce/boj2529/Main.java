@@ -1,7 +1,6 @@
-package code_plus.bruteForce.boj2529;
+package boj.bruteForce.boj2529;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
